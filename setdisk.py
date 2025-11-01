@@ -117,7 +117,6 @@ class SetDisk:
         value = self.encode(value)
         return self._findPrimary(value)
 
-    
     def add(self, value):
         value = self.encode(value)
         with self.lock:
@@ -127,6 +126,9 @@ class SetDisk:
             else:
                 adress = self._addSecondary(value)
                 self._addPrimary(value, adress)
+
+    def remove(self, value):
+        raise NotImplementedError("Remove operation is not yet available")
 
 
         
