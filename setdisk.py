@@ -9,7 +9,7 @@ from typing import BinaryIO
 
 
 class SetDisk:
-    def __init__(self, primary: BinaryIO, secondary: BinaryIO, primarySize: int, secondarySize: int, multiple: int, algo: Literal["json", "pickle"] = "json", log=lambda: None): # 10 Mo 1024*1024 * 10
+    def __init__(self, primary: BinaryIO, secondary: BinaryIO, primarySize: int, secondarySize: int, multiple: int, algo: Literal["json", "pickle"] = "json", log=lambda x: None): # 10 Mo 1024*1024 * 10
         self.primary = primary
         self.secondary = secondary
         self.cursorSecondary = 1
@@ -120,7 +120,7 @@ class SetDisk:
     def add(self, value):
         value = self.encode(value)
         with self.lock:
-            self.log(self._findPrimary(value))
+            #self.log(self._findPrimary(value))
             if self._findPrimary(value) == value:
                 self.log("\033[32m ADD Primary : Duplicate detected")
             else:
