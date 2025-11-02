@@ -151,8 +151,8 @@ if __name__ == "__main__":
         log = lambda x: print(x)
     else:
         log = lambda x: None
-    session = SetDisk(primary=io.BytesIO(),     # open("setdisk.table.primary.db", "r+b")
-                      secondary=io.BytesIO(),   # open("setdisk.table.secondary.db", "r+b")
+    session = SetDisk(primary=open("setdisk.table.primary.db", "r+b"),     # open("setdisk.table.primary.db", "r+b")      # io.BytesIO()
+                      secondary=open("setdisk.table.secondary.db", "r+b"),   # open("setdisk.table.secondary.db", "r+b")    # io.BytesIO()
                       primarySize=1024 * 1024 * 1024, secondarySize=1024 * 1024 * 1024, multiple=6, log=log)  # 64 Ko
     
     print(session._findSecondary(1))
