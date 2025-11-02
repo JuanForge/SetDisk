@@ -15,7 +15,7 @@ class SetDisk:
         self.cursorSecondary = 1
         self.primarySize = primarySize
         self.secondarySize = secondarySize
-        self.lock = threading.RLock()
+        #self.lock = threading.RLock()
         self.algo = algo
         self.multiple = multiple
         self.log = log
@@ -54,37 +54,37 @@ class SetDisk:
         while number_try <= 1000:
             address = self.hash_address(seed, self.primarySize, self.multiple,  seed=number_try)
             self.log(f"\033[32m ADD Primary : {adressSecondary!r} at {address} \033[0m")
-            with self.lock:
-                self.primary.seek(address)
-                header = self.primary.read(1)
-                self.log(f"\033[32m ADD Primary : Header read at address {address}: {header} \033[0m")
-                if header == b'\x00':
-                    dataMETA = struct.pack("!I", adressSecondary)
-                    if len(dataMETA)+1 <= self.multiple:
-                        self.primary.seek(address)
-                        self.primary.write(b'\x01')
-                        self.primary.write(dataMETA)
-                        #self.primary.write(str(adressSecondary).encode("utf-8"))
-                    else:
-                        raise RuntimeError("The block size (multiple) is too small")
-                    return
+            #with self.lock:
+            self.primary.seek(address)
+            header = self.primary.read(1)
+            self.log(f"\033[32m ADD Primary : Header read at address {address}: {header} \033[0m")
+            if header == b'\x00':
+                dataMETA = struct.pack("!I", adressSecondary)
+                if len(dataMETA)+1 <= self.multiple:
+                    self.primary.seek(address)
+                    self.primary.write(b'\x01')
+                    self.primary.write(dataMETA)
+                    #self.primary.write(str(adressSecondary).encode("utf-8"))
                 else:
-                    self.log(f"\033[0;31m ADD Primary : Collision detected at address : {address} \033[0m")
+                    raise RuntimeError("The block size (multiple) is too small")
+                return
+            else:
+                self.log(f"\033[0;31m ADD Primary : Collision detected at address : {address} \033[0m")
             number_try += 1
         raise RuntimeError("ADD Primary : Too many collisions")
     
     def _addSecondary(self, value):
         data = struct.pack("!I", len(value)) + value
         data_size = len(data)
-        with self.lock:
-            if self.cursorSecondary + data_size <= self.secondarySize:
-                self.log(f"\033[94m ADD Secondary : {value} at {self.cursorSecondary} \033[0m")
-                self.secondary.seek(self.cursorSecondary)
-                self.secondary.write(data)
-                self.cursorSecondary += data_size
-                return self.cursorSecondary - data_size
-            else:
-                raise RuntimeError("more space available in the secondary table")
+        #with self.lock:
+        if self.cursorSecondary + data_size <= self.secondarySize:
+            self.log(f"\033[94m ADD Secondary : {value} at {self.cursorSecondary} \033[0m")
+            self.secondary.seek(self.cursorSecondary)
+            self.secondary.write(data)
+            self.cursorSecondary += data_size
+            return self.cursorSecondary - data_size
+        else:
+            raise RuntimeError("more space available in the secondary table")
     
     def _findPrimary(self, value):
         number_try = 0
@@ -106,12 +106,12 @@ class SetDisk:
         return False 
     
     def _findSecondary(self, adress):
-        with self.lock:
-            self.secondary.seek(adress)
-            data = self.secondary.read(4)
-            if len(data) >= 4:
-                size = struct.unpack("!I", data)[0]
-                return self.secondary.read(size)
+        #with self.lock:
+        self.secondary.seek(adress)
+        data = self.secondary.read(4)
+        if len(data) >= 4:
+            size = struct.unpack("!I", data)[0]
+            return self.secondary.read(size)
     
     def __contains__(self, value) -> bool:
         value = self.encode(value)
@@ -119,13 +119,13 @@ class SetDisk:
 
     def add(self, value):
         value = self.encode(value)
-        with self.lock:
-            #self.log(self._findPrimary(value))
-            if self._findPrimary(value) == value:
-                self.log("\033[32m ADD Primary : Duplicate detected")
-            else:
-                adress = self._addSecondary(value)
-                self._addPrimary(value, adress)
+        #with self.lock:
+        #self.log(self._findPrimary(value))
+        if self._findPrimary(value) == value:
+            self.log("\033[32m ADD Primary : Duplicate detected")
+        else:
+            adress = self._addSecondary(value)
+            self._addPrimary(value, adress)
 
     def remove(self, value):
         raise NotImplementedError("Remove operation is not yet available")
