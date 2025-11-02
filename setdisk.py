@@ -180,8 +180,24 @@ if __name__ == "__main__":
             #print("Not exists")
     print(f"execution time : {time.monotonic() - start_time}")
 
-    sessionset = set()
 
+    from virtualIO import virtualIO
+    session = SetDisk(primary=virtualIO(),     # open("setdisk.table.primary.db", "r+b")
+                      secondary=virtualIO(),   # open("setdisk.table.secondary.db", "r+b")
+                      primarySize=1024 * 1024 * 1024, secondarySize=1024 * 1024 * 1024, multiple=6, log=log)
+    start_time = time.monotonic()
+    for i in range(5_000_000):
+        session.add(f"value_{i}")
+        if f"value_{i}" in session:
+            pass
+            #print("Exists")
+        else:
+            pass
+            #print("Not exists")
+    print(f"execution time with VirtualIO: {time.monotonic() - start_time}")
+
+
+    sessionset = set()
     start_time = time.monotonic()
     for i in range(5_000_000):
         sessionset.add(f"value_{i}")
@@ -191,4 +207,4 @@ if __name__ == "__main__":
         else:
             pass
             #print("Not exists")
-    print(f"execution time whit Set: {time.monotonic() - start_time}")
+    print(f"execution time with Set: {time.monotonic() - start_time}")
